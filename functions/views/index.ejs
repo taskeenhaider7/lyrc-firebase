@@ -1,0 +1,153 @@
+hello
+<form method="POST" action="/users/login">
+  <input type="text" name="email">
+  <input type="password" name="password">
+  <input type="submit">
+</form>
+<form action="/fotes/upload" method = 'post' enctype="multipart/form-data">
+    <label for='file'>Upload Image</label>
+    <input type="file" name="media"  multiple accept="image/*"/>
+    <input type="text" name="fote" value='{"note":"this is my note","location":{"latitute":41,"longitude":41},"hashtags":["#one","#two"],"type":"video","date":"1527027916890"}'/>
+    <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Create user</h3>
+<form action="/users/create" method = 'post' >
+    <input type="text" name="name" placeholder="name">
+    <input type="text" name="username" placeholder="username">
+    <input type="text" name="email" placeholder="email">
+    <input type="password" name="password" placeholder="password">
+    <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Update photo</h3>
+<form action="/profile/update_photo" method = 'post' enctype="multipart/form-data">
+    <label for='file'>Upload Image</label>
+    <input type="file" name="file"  multiple accept="image/*"/>
+    <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Update token</h3>
+<form action="/notifications/update_token" method = 'post' >
+  <input type="text" name="token" value='mytoken:123kfvdf9isckasa'/>
+  <input type="submit" name='submit' value="submit"/>
+
+</form>
+<h3>Add like</h3>
+<form action="/fotes/like" method = 'post' >
+  <input type="text" name="idFote"/>
+  <input type="submit" name='submit' value="submit"/>
+
+</form>
+<h3>Remove like</h3>
+<form action="/fotes/unlike" method = 'post' >
+  <input type="text" name="idFote"/>
+  <input type="submit" name='submit' value="submit"/>
+
+</form>
+<h3>add comment</h3>
+<form action="/fotes/comment" method = 'post' >
+  id
+  <input type="text" name="idFote"/>
+  comment
+  <input type="text" name="comment"/>
+  <input type="submit" name='submit' value="submit"/>
+
+</form>
+<h3>create conversation</h3>
+<form action="/dms/create" method = 'post' >
+  <input type="text" name="uid"/>
+  <input type="submit" name='submit' value="submit"/>
+
+</form>
+<h3>send message</h3>
+<form action="/dms/5b468ef3e1c54a052dfcdaba/send" method = 'post' >
+  <input type="text" name="message"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Send message with photo</h3>
+<form  action="/dms/5b468ef3e1c54a052dfcdaba/send" method = 'post' enctype="multipart/form-data">
+    <label for='file'>Upload Image or Video</label>
+    <input type="text" name="message"/>
+    <input type="file" name="media" />
+    <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Event</h3>
+<form action="/fotes/5b60948eb1cb6849d823ee1f/event/interact" method = 'post' >
+  <input type="text" name="interaction"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Task</h3>
+<form action="/fotes/5b634a040719e25945168ab7/task/interact" method = 'post' >
+  <input type="text" name="interaction"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Trips</h3>
+<form action="/fotes/5b635481a3b22d6865ae8945/trip/interact" method = 'post' >
+  <input type="text" name="interaction"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Delete Fote</h3>
+<form action="/fotes/5b747042a8419c28109fb29d/delete" method = 'post' >
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Delete msg</h3>
+<form action="/dms/5b771d9dc60ed20fec42be98/delete_msg" method = 'post' >
+  <input type="text" name="timestamp"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Follow</h3>
+<form action="/users/5b197e1fe170a8228077dcab/follow" method = 'post' >
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>block</h3>
+<form action="/users/5bfdbe9a5d07d764a3761d8d/block" method = 'post' >
+  <input type="submit" name='submit' value="block"/>
+</form>
+<h3>Unblock</h3>
+<form action="/users/5bfdbe9a5d07d764a3761d8d/unblock" method = 'post' >
+  <input type="submit" name='submit' value="block"/>
+</form>
+
+<h3>Unfollow</h3>
+<form action="/users/5b197e1fe170a8228077dcab/unfollow" method = 'post' >
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>send code</h3>
+<form action="/api/me/phone_verification" method = 'post' >
+  <input type="text" name="countryCode"/>
+  <input type="text" name="phone"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>verify code</h3>
+<form action="/api/me/phone_verification/verify" method = 'post' >
+  <input type="text" name="code"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Check email</h3>
+<form action="/api/users/check_email" method = 'post' >
+  <input type="text" name="email"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Check username</h3>
+<form action="/api/users/check_username" method = 'post' >
+  <input type="text" name="username"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Change description</h3>
+<form action="/profile/update_profile" method = 'post' >
+  <input type="text" name="description"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+
+<h3>Subscribe</h3>
+<form action="/subscribers_list/subscribe" method = 'post' >
+  <input type="email" name="email"/>
+  <input type="submit" name='submit' value="submit"/>
+</form>
+<h3>Report</h3>
+<form action="/fotes/5bf300668e17ba46e056c748/report" method = 'post' >
+  <input type="submit" name='submit' value="submit"/>
+</form>
+
+<h3>Delete conversation</h3>
+<form action="/dms/5c0acc4e3eb5981978a2f4dd/delete" method = 'post' >
+  <input type="submit" name='submit' value="submit"/>
+</form>
