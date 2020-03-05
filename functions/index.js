@@ -26,6 +26,11 @@ const ImageTools = require('./models/ImageTools');
 const FotesNotifications = require('./models/FotesNotifications');
 
 const Search = require('./app/Search');
+const FotesFuncs = require('./app/FotesFuncs');
+const UsersFunc = require('./app/Users');
+const emailVerification = require('./app/EmailVerification');
+const ForgotPassword = require('./app/ForgotPassword');
+const EmailValidator = require("email-validator");
 
 /*admin.initializeApp(functions.config.firebase);
 
@@ -43,9 +48,9 @@ app.use((req, res, next) => {
    req.identifier = uuid();
    const logString = `a request has been made with the following uuid [${req.identifier}] ${req.url} ${req.headers['user-agent']} ${JSON.stringify(req.body)}`;
    //logger.log(logString, 'info');
+    console.log(logString);
    next();
 });
-
 app.get('/', function (req, res) {
    Fotes.createIndex();
     ///home/taskeen/Computer/Git/wesakh/lyrc-firebase/functions/views/index.ejs
@@ -104,8 +109,6 @@ app.get('/api/fotes/hashtag', function (req, res) {
    });
 });
 
-
-
 //******************Authentication************************//
 
 app.get('/reset_password', function (req, res) {
@@ -128,9 +131,10 @@ app.post('/users/login', function (req, res) {
    var users = require('./models/users');
    _email = req.body.email;
    _pwd = req.body.password;
-   //var cookies    = new Cookies( req, res);
+   var cookies    = new Cookies( req, res);
    //log in the user.
    function login_callback(login) {
+
       if (login[0]) {
          //storage cookie in browser
          var d = new Date();
@@ -138,10 +142,9 @@ app.post('/users/login', function (req, res) {
          var month = d.getMonth();
          var day = d.getDate();
          var c = new Date(year + 1, month, day); //set cookie expiration after 1 year
-         //cookies.set( "ftoken", login[2], { httpOnly: false,expires: c } )
+         cookies.set( "ftoken", login[2], { httpOnly: false,expires: c } )
          res.json({"success": true, "ftoken": login[2]});
       } else {
-         console.log(login);
          res.status(400).json({"success": false, "reason": login[1].reason})
 
       }
@@ -149,7 +152,6 @@ app.post('/users/login', function (req, res) {
 
    users.login(_email, _pwd, login_callback);
 });
-
 app.get('/users/logout', function (req, res) {
    var cookies = new Cookies(req, res);
    var _Cookies = require('./models/cookies');
@@ -178,7 +180,6 @@ app.get('/users/logout', function (req, res) {
    _Cookies.validateCookie(idToken, validate_cookie);
 
 });
-
 app.post('/users/login/fb', function (req, res) {
    var cookies = new Cookies(req, res);
    fbToken = req.body.fbtoken
@@ -340,8 +341,8 @@ app.post('/users/login/fb', function (req, res) {
    //  }
    // Users.create(_user,create_callback)
 });
-
 app.post('/api/users/check_email', function (req, res) {
+   console.log(req);
    _email = req.body.email;
    _emailIsValid = EmailValidator.validate(_email);
    if (!_emailIsValid) {
@@ -360,10 +361,9 @@ app.post('/api/users/check_email', function (req, res) {
 
    }
 });
-
 app.post('/api/users/check_username', function (req, res) {
-   _username = req.body.username
-   if (_username == "") {
+   _username = req.body.username;
+   if (_username === "") {
       res.status(400).json({"success": false, "reason": "Username can not be empty."})
       return 1;
    }
@@ -377,7 +377,8 @@ app.post('/api/users/check_username', function (req, res) {
    }
    else {
       function check_callback(l) {
-         if (l == 0) {
+         console.log(l);
+         if (l === 0) {
             res.status(200).json({"success": true, "reason": "Username is available."})
          } else {
             res.status(400).json({"success": false, "reason": "Username is not available."})
@@ -388,12 +389,11 @@ app.post('/api/users/check_username', function (req, res) {
 
    }
 });
-
 app.post('/users/create', function (req, res) {
-   _name = req.body.name
-   _username = req.body.username
-   _email = req.body.email
-   _password = req.body.password
+   _name = req.body.name;
+   _username = req.body.username;
+   _email = req.body.email;
+   _password = req.body.password;
    _user = {
       "name": _name.trim(),
       "username": _username.trim(),
@@ -401,42 +401,42 @@ app.post('/users/create', function (req, res) {
       "password": _password.trim(),
       "source": "fotes.co",
       "description": ""
-   }
-   var cookies = new Cookies(req, res);
-   if (_name.trim() == "") {
-      res.status(400).json({"success": false, "reason": "Name can not be empty."})
+   };
+   const cookies = new Cookies(req, res);
+   if (_name.trim() === "") {
+      res.status(400).json({"success": false, "reason": "Name can not be empty."});
       return 1;
    }
-   if (_username.trim() == "") {
-      res.status(400).json({"success": false, "reason": "Username can not be empty."})
+   if (_username.trim() === "") {
+      res.status(400).json({"success": false, "reason": "Username can not be empty."});
       return 1;
    }
    if (_username.trim().length >= 16) {
-      res.status(400).json({"success": false, "reason": "Username can not be longer than 16 characters."})
+      res.status(400).json({"success": false, "reason": "Username can not be longer than 16 characters."});
       return 1;
    }
    if (_username.trim().includes(" ")) {
-      res.status(400).json({"success": false, "reason": "Username can not contain empty spaces"})
+      res.status(400).json({"success": false, "reason": "Username can not contain empty spaces"});
       return 1;
    }
    _emailIsValid = EmailValidator.validate(_email);
    if (!_emailIsValid) {
-      res.status(400).json({"success": false, "reason": "Email is invalid"})
+      res.status(400).json({"success": false, "reason": "Email is invalid"});
       return 1;
    }
-   if (_password.trim() == "") {
-      res.status(400).json({"success": false, "reason": "Password can not be empty."})
+   if (_password.trim() === "") {
+      res.status(400).json({"success": false, "reason": "Password can not be empty."});
       return 1;
    }
    if (_password.trim().length <= 4) {
-      res.status(400).json({"success": false, "reason": "Password can not be shorter than 5 characters."})
+      res.status(400).json({"success": false, "reason": "Password can not be shorter than 5 characters."});
       return 1;
    }
    if (_password.trim().includes(" ")) {
-      res.status(400).json({"success": false, "reason": "Password can not contain empty spaces"})
+      res.status(400).json({"success": false, "reason": "Password can not contain empty spaces"});
       return 1;
    }
-   var _Cookies = require('./models/cookies');
+   const _Cookies = require('./models/cookies');
 
    function create_callback(r) {
       if (r[0]) {
@@ -508,7 +508,6 @@ app.post('/users/create', function (req, res) {
 
    Users.create(_user, create_callback)
 });
-
 app.get('/users/search', function (req, res) {
    _username = req.param('username');
    var cookies = new Cookies(req, res);
@@ -536,7 +535,6 @@ app.get('/users/search', function (req, res) {
    _Cookies.validateCookie(idToken, validate_cookie);
 
 });
-
 app.get('/feed/me', function (req, res) {
    var cookies = new Cookies(req, res);
    var _Cookies = require('./models/cookies');
@@ -599,17 +597,22 @@ app.get('/api/me', function (req, res) {
    function validate_cookie(result) {
       if (result[0]) {//if valid cookie
          function latestPlace(place) {
+             console.log("place", place);
             _obj = result[2];
             _obj["latest_place"] = place;
 
             function followers_callback(f) {
                _obj["followers_full"] = f;
 
+                console.log("followers_full", f);
+
                function following_callback(f) {
                   _obj["following_full"] = f;
+                   console.log("following_full", f);
 
                   function blocked_list_callback(b) {
                      _obj["blocked_users"] = b;
+                     console.log(_obj);
                      res.status(200).send(_obj);
                   }
 
@@ -723,11 +726,9 @@ app.get('/users/:user_id', function (req, res) {
 
    function validate_cookie(result) {
       if (result[0]) {
-         function get_user_callback(user) {
-            if (user == null) {
+         /*function get_user_callback(user) {
+            if (user.empty) {
                return res.send({"success": false, "error": "Invalid uid"});
-            } else {
-
             }
 
             function latestPlace(place) {
@@ -753,7 +754,9 @@ app.get('/users/:user_id', function (req, res) {
          }
 
 
-         Users.getUserById(uid, get_user_callback)
+         Users.getUserById(result[1], get_user_callback)*/
+
+         console.log(result[1]);
       } else {
          return res.send({"success": false, "error": "Invalid auth"});
       }
@@ -763,7 +766,6 @@ app.get('/users/:user_id', function (req, res) {
 
 
 });
-
 app.get('/api/users/:userId/followers', function (req, res) {
    var cookies = new Cookies(req, res);
    var _Cookies = require('./models/cookies');
@@ -810,7 +812,6 @@ app.get('/api/users/:userId/following', function (req, res) {
    _Cookies.validateCookie(idToken, validate_cookie);
 
 });
-//unset cookies
 app.get('/unset_cookie', function (req, res) {
    var cookies = new Cookies(req, res);
    var idToken = cookies.get("ftoken")
@@ -1574,32 +1575,6 @@ app.post('/fotes/:foteId/trip/interact', function (req, res) {
 
    _Cookies.validateCookie(idToken, validate_cookie);
 });
-// app.post('/fotes/:foteId/trip/interact',function(req,res){
-//   var cookies = new Cookies( req, res);
-//   var _Cookies = require('./models/cookies');
-//   var idToken = cookies.get( "ftoken" );
-//   foteId = req.params.foteId;
-//   var interaction  = req.body.interaction;
-//   _validInteractions = ["not_interested","interested"];
-//   if(!_validInteractions.includes(interaction)){
-//     return res.status(401).send({"success":false,"error":"Invalid interaction"});
-//     return 1;
-//   }
-//   function validate_cookie(result){
-//     if(result[0]){//if valid cookie
-//       var uid = result[1];
-//       function callbackInteraction(result){
-//         return res.status(200).send({"success":result});
-//       }
-//       Trips.interact(foteId,uid,interaction,callbackInteraction);
-//       // FCM.notifyComment(admin,result[2],_idFote,_comment)
-//
-//     } else {
-//       return res.send({"success":false,"error":"Invalid auth"});
-//     }
-//   }
-//   _Cookies.validateCookie(idToken,validate_cookie);
-// });
 app.get('/foteinfo/:foteId/', function (req, res) {
    var cookies = new Cookies(req, res);
    var _Cookies = require('./models/cookies');
@@ -1875,9 +1850,8 @@ app.post('/users/:user_id/unfollow', function (req, res) {
 
 
 });
-/*
 // ENDPOINTS END
-var server = https.createServer(options, app);
+/*var server = https.createServer(options, app);
 
 _httpsPort = 4001;
 server.listen(_httpsPort, function () {

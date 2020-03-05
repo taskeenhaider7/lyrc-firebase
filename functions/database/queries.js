@@ -1,9 +1,12 @@
-const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-admin.initializeApp(functions.config.firebase);
+const serviceAccount = require("../../serviceAccountKey");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://lyrc-233619.firebaseio.com"
+});
 
 const db = admin.firestore();
-
 
 module.exports = {
 
@@ -32,6 +35,17 @@ module.exports = {
         options.forEach(option => {
             dbRef.where(option.key, option.operator, option.value);
         });
+
+        return dbRef.get();
+
+    },
+
+    getOneRecordByCondition(collectionName, options) {
+        const dbRef = db.collection(collectionName);
+        options.forEach(option => {
+            dbRef.where(option.key, option.operator, option.value);
+        });
+
         return dbRef.get();
 
     },
@@ -61,7 +75,16 @@ module.exports = {
         options.forEach(option => {
             dbRef.where(option.key, option.operator, option.value);
         });
-        return dbRef.update(data);
+
+        dbRef.get().then(snapshot=>{
+
+            snapshot.forEach(doc=>{
+                return dbRef.document(doc.id).update(data);
+            })
+
+        }).catch(error=>{
+            throw error;
+        })
     },
 
     removeChildByCondition(collectionName, options, data) {

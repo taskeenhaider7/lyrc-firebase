@@ -83,11 +83,12 @@ self = module.exports = {
     },
     getUserById: function (user_id, return_callback) {
 
-        const options = [{key: 'uid', operator: '==', value: user_id}];
-        queries.getByCondition("users", options).then((results) => {
+        queries.getRecordByDocumentId("users", user_id).then((user) => {
 
-            return_callback(results[0]);
+            return_callback(user);
 
+        }).catch(error=>{
+            console.log(error);
         })
     },
     getUserByIdProfile: function (user_id, return_callback) {
@@ -165,43 +166,43 @@ self = module.exports = {
     login: function (email, pwd, login_callback) {
         //check if credentials match
 
-        const options = [{key: 'email', operator: '==', value: email}, {
-            key: 'source',
-            operator: '==',
-            value: 'fotes.co'
-        }];
+        console.log("Login function in users model");
+        const options = [{key: 'email', operator: '==', value: email}];
 
-        queries.getByCondition("users", options).then((results) => {
+        queries.getByCondition('users', options).then((results) => {
 
             if (results.empty) {
                 login_callback([false, {"reason": "Invalid email."}]);
             } else {
-                bcrypt.compare(pwd, results[0].password, function (err, res) {
-                    if (!res) {
-                        login_callback([false, {"reason": "Invalid password."}]);
-                    } else {
-                        //  create jwt
-                        token = jwt.sign({
-                            exp: Math.floor(Date.now() / 1000),
-                            data: results[0].uid
-                        }, 'secret');
+                results.forEach(doc => {
+                    const data = doc.data();
+                    bcrypt.compare(pwd, data.password, function (err, res) {
+                        if (!res) {
+                            login_callback([false, {"reason": "Invalid password."}]);
+                        } else {
+                            //  create jwt
+                            token = jwt.sign({
+                                exp: Math.floor(Date.now() / 1000),
+                                data: doc.id
+                            }, 'secret');
 
-                        //save token in cookies collection so the user can login
-                        function cookie_callback(cre) {
-                            //send it all back to main
-                            login_callback([true, {"reason": "Password valid"}, token]);
+                            //save token in cookies collection so the user can login
+                            function cookie_callback(cre) {
+                                console.log(cre);
+                                login_callback([true, {"reason": "Password valid"}, token]);
+                            }
+
+                            module.exports.update_last_seen(doc.id);
+                            Cookies.setCookie(doc.id, token, cookie_callback);
+
                         }
+                    });
 
-
-                        module.exports.update_last_seen(results[0].uid);
-                        Cookies.setCookie(results[0].uid, token, cookie_callback);
-
-                    }
                 });
             }
 
         }).catch(() => {
-            login_callback([false]);
+            login_callback([false, {"reason": "Internal server error"}]);
         });
     },
     loginFb: function (fb_id, login_callback) {
@@ -288,7 +289,7 @@ self = module.exports = {
 
         queries.getByConditionAndLimit("users", options, 10).then((results) => {
 
-            results_callback(results.length);
+            results_callback(results._size);
 
         }).catch(error => {
             throw error;
@@ -319,7 +320,7 @@ self = module.exports = {
         const options = [{key: 'username', operator: '==', value: username}];
         queries.getByConditionAndLimit("users", options, 10).then(results => {
 
-            results_callback(results.length);
+            results_callback(results._size);
 
         }).catch(error => {
             throw error;
@@ -329,7 +330,7 @@ self = module.exports = {
 
     /******************************************************************NOT FIXED START*****************************************************/
     followers: function (uid, results_callback) {
-        _queryFollowers = [
+        /*_queryFollowers = [
             {
                 "$match":
                     {
@@ -344,7 +345,11 @@ self = module.exports = {
 
                 }
             }
-        ];
+        ];*/
+
+        //for dummy
+        results_callback([]);
+
         /*MongoClient.connect(url, function (err, db) {
             //Delete function
             Array.prototype.remove = function () {
@@ -410,7 +415,7 @@ self = module.exports = {
     },
 
     following: function (uid, results_callback) {
-        _queryFollowing = [
+        /*_queryFollowing = [
             {
                 "$match":
                     {
@@ -437,7 +442,11 @@ self = module.exports = {
 
                 }
             }
-        ];
+        ];*/
+
+        //dummy data
+        results_callback([]);
+
         /*MongoClient.connect(url, function (err, db) {
             db.collection("users").aggregate(_queryFollowing, function (err, fdocs) {
                 results_callback(fdocs)
@@ -465,10 +474,13 @@ self = module.exports = {
     },
 
     //update user photo
-    update_last_seen: function (user_id) {
+    update_last_seen: function (docId) {
 
-        const options = [{key: 'uid', operator: '==', value: user_id}];
-        queries.updateByCondition("users", options, {"last_seen": Date.now()}).catch(error => {
+        queries.updateByDocumentId("users", docId, {"last_seen": Date.now()}).then(snapshot=>{
+
+            console.log(snapshot);
+
+        }).catch(error => {
             console.log(error);
         });
     },
@@ -562,7 +574,7 @@ self = module.exports = {
         });*/
     },
     get_blocked_list: function (uid, results_callback) {
-        _queryBlocked = [
+        /*_queryBlocked = [
             {
                 "$match":
                     {
@@ -577,7 +589,10 @@ self = module.exports = {
 
                 }
             }
-        ]
+        ]*/
+
+        results_callback([]);
+
         /*MongoClient.connect(url, function (err, db) {
             query = {"uid": uid}
             fields = {"password": 0, "_id": 0, "blocked_by": 0}

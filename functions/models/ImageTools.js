@@ -1,8 +1,3 @@
-// Fotes.js
-// Handles some Image processing tools
-// Swiffshot Technologies Inc. 2018 - All rights reserved
-// Author: Darien Miranda <panzerfausten@gmail.com>
-// ========
 var histogram = require('histogram');
 var Color = require('color');
 

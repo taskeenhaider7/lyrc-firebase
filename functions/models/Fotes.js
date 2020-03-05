@@ -1,18 +1,18 @@
-const Users = require('./users');
 const queries = require('../database/queries.js');
 module.exports = {
     getLatestPosition: function (uid, position_callback) {
 
         queries.getRecordByDocumentId("fotes", uid).then(docs => {
+            if (!docs.empty) {
 
-            if (docs.empty) {
-
-                try {
-                    _city = docs[0].data.place.name;
-                    position_callback(_city);
-                } catch (ex) {
-                    position_callback("");
-                }
+                docs.forEach(doc=>{
+                    try {
+                        _city =doc.data().place.name;
+                        position_callback(_city);
+                    } catch (ex) {
+                        position_callback("");
+                    }
+                });
 
             } else {
                 position_callback("");

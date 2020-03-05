@@ -1,6 +1,4 @@
-const Users = require('./users');
 const queries = require('../database/queries.js');
-
 
 module.exports = {
     //NULL_USER: -9999999999,
@@ -8,17 +6,40 @@ module.exports = {
     setCookie: function (user_id, ftoken, return_cookie) {
 
         const data = {"user_id": user_id, "ftoken": ftoken, "creation_date": new Date()};
-        queries.updateByCondition("cookies", [{key: "user_id", operator: '==', value: user_id}], data).catch(error => {
-            console.log(error);
+        const option = [{key: "user_id", operator: '==', value: user_id}];
+        queries.getByCondition("cookies", option).then(snapshot => {
+
+            if (snapshot._size > 0) {
+                snapshot.forEach(doc => {
+                    queries.updateByDocumentId("cookies", doc.id, data).then(doc => {
+
+                        return_cookie(doc);
+
+                    }).catch((error) => {
+                        return_cookie(error);
+                    });
+                })
+            } else {
+                queries.add("cookies", data).then(snapshot => {
+
+                    snapshot.forEach(doc=>{
+                        return_cookie(doc);
+                    });
+
+                }).catch(error => {
+                    return_cookie(error);
+                });
+            }
+
+        }).catch(error => {
             return_cookie(error);
         });
     },
 
     validateCookie: function (ftoken, return_cookie) {
-
-        if (!ftoken){
+        if (!ftoken) {
             return_cookie([false, null, null]);
-        }else {
+        } else {
 
             const option = [{key: "ftoken", operator: '==', value: ftoken}];
             queries.getByCondition("cookies", option).then(snapshot => {
@@ -26,15 +47,23 @@ module.exports = {
                     return_cookie([false, null, null]);
                 } else {
 
-                    const result = snapshot[0];
+                    const Users = require('./users');
+                    snapshot.forEach(doc => {
 
-                    Users.getUserById(result.user_id, (user) => {
-                        if (user == null) {
-                            return_cookie([false, null, null]);
-                        } else {
-                            Users.update_last_seen(result.user_id);
-                            return_cookie([true, result.user_id, user]);
+                        const data = doc.data();
+                        function user_callback(userResult) {
+                            if (userResult === null) {
+                                return_cookie([false, null, null]);
+                            } else {
+                                Users.update_last_seen(userResult.id);
+                                const userData = userResult.data();
+                                delete userData.password;
+                                return_cookie([true, userResult.id, userData]);
+                            }
                         }
+
+                        Users.getUserById(data.user_id, user_callback);
+
                     });
 
                 }
@@ -44,7 +73,6 @@ module.exports = {
             });
 
         }
-
 
 
     },

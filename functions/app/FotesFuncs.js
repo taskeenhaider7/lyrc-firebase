@@ -1,8 +1,8 @@
 const Jimp = require("jimp");
 const mime  = require('mime');
 const ImageTools = require('../models/ImageTools');
-const s3 = require('s3');
-var s3Client = s3.createClient({
+
+/*var s3Client = s3.createClient({
   maxAsyncS3: 20,     // this is the default
   s3RetryCount: 3,    // this is the default
   s3RetryDelay: 1000, // athis is the default
@@ -14,7 +14,7 @@ var s3Client = s3.createClient({
     // any other options are passed to new AWS.S3()
     // See: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
   },
-});
+});*/
 const Fotes = require('../models/Fotes');
 const Hashtag = require('../models/Hashtag');
 
@@ -26,8 +26,8 @@ exports.createFote = function(user, fote_req, files, res, callback){
         fote = JSON.parse(fote_req);
     }
     if(!validateFote(fote)) return res.status(400).json({"message": 'Missing parameters', "parameters": "fote"});
-    if(files.length == 0) return res.status(400).json({"message": 'Missing parameters', "parameters": "files"});
-    
+    if(files.length === 0) return res.status(400).json({"message": 'Missing parameters', "parameters": "files"});
+
     let photo_fote = null;
     if(files['photo_fote']){
         photo_fote = files['photo_fote'][0];
@@ -50,7 +50,7 @@ exports.createFote = function(user, fote_req, files, res, callback){
           "height":height,
           "aspect_ratio":ratio,
           "predominant_color":""
-        }
+        };
         let thumbnailPath = "uploads/" + file_name + "_thumbnail." + extension;
         photo.quality(0.25).scale(0.8).write(thumbnailPath);
         ImageTools.getPredominantColor(photo_fote.path,(colorPred)=>{
@@ -65,7 +65,7 @@ exports.createFote = function(user, fote_req, files, res, callback){
             "path":thumbnailPath,
             "size": photo_fote.size,
             "metadata":metadata
-          }
+          };
           photo_fote.metadata = metadata;
           uploadFiles(photo_fote, thumbnail, audio_fote, (err, resp)=>{
             if(err) return res.status(500).json({"message": "Internal Server Error"});
@@ -86,7 +86,7 @@ exports.createFote = function(user, fote_req, files, res, callback){
               let status = sFote[0] ? 201:401;
               console.log("result Fotes.create");
               console.log(sFote[1]);
-              if(status == 201){
+              if(status === 201){
                 if(fote.hashtags){
                   Hashtag.addHashtags(fote.hashtags, (err, hashes)=>{
                     return res.status(status).send(sFote[1]);
